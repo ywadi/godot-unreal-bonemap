@@ -1,5 +1,7 @@
 # Godot Unreal BoneMap
 
+``` Usage PDF in files above with screenshots ```
+
 Drop-in plugin that lets Godot 4 play **Unreal Engine 5 Mannequin animations on UE5 Mannequin characters** with no retargeting loss. No T-pose snapping, no spine straightening, no chin-up artifacts — the imported skeleton matches the source one-to-one, and animation tracks apply directly.
 
 If you've ever fought Mixamo → Godot retargeting, this is the alternative: standardize on the UE5 skeleton end-to-end and skip retargeting entirely. The plugin batches the correct import settings across selected files via right-click.
@@ -87,37 +89,6 @@ When you run *Apply UE5 BoneMap*, the plugin writes these to each selected file'
 | `ue5_mannequin_profile.tres` | `SkeletonProfile` | The 89-bone UE5 template with anatomical rest pose |
 | `ue5_bone_map.tres` | `BoneMap` | Pre-populated mapping (89/89 matches against UE5-named skeletons) |
 | `source_scripts/` | folder | Build-time scripts for regenerating the two `.tres` files. See [`source_scripts/README.md`](source_scripts/README.md). Not needed for normal use. |
-
----
-
-## Troubleshooting
-
-### "The selected resource (BoneMap) does not match any type expected for this property (SkeletonProfile)"
-You assigned `ue5_bone_map.tres` to a `SkeletonProfile` slot. The BoneMap goes in the import dock's **BoneMap** field; the SkeletonProfile lives **inside** the BoneMap and is already wired up. Don't touch the Profile slot — assign only the BoneMap.
-
-### Custom SkeletonProfile shows a black box with one pink dot in the BoneMap editor
-Cosmetic only — Godot's BoneMap editor draws a body silhouette only for `SkeletonProfileHumanoid`. Custom profiles render as a black canvas with all 89 handle dots stacked at (0,0). Doesn't affect retargeting; the plugin pre-populates the BoneMap so you don't need that UI.
-
-### Character imports lying on its back / rotated 90°
-Two common causes:
-1. **FBX importer mismatch** — confirm Project Settings → Filesystem → Import → FBX → Importer is `ufbx`.
-2. **Front-axis mismatch in the source FBX** — re-export from Unreal with **Force Front X Axis ON** in the FBX export advanced options.
-
-### Pelvis floats / model below origin / pose looks wrong after import
-You're missing one of the two critical settings. Verify in the file's Import dock:
-- **Fix Silhouette** = OFF
-- **Retarget Method** = **Overwrite Axis** (not None, not Use Modifier)
-
-If those are set correctly and it's still wrong, run the plugin's *Apply UE5 BoneMap* on the file once more — the plugin sets all six retargeting flags atomically.
-
-### Animation only moves the root bone
-The animation FBX has stripped per-bone keys, or the animation file's skeleton differs from the character's. Open the animation as a standalone scene, click the AnimationPlayer, look at the track count — should be 100+ tracks for a typical UE animation. If you see only 1–3, re-export from Unreal with **Export Animations: ON** and confirm the source file actually contains skeletal animation.
-
-### `UID duplicate detected` warnings
-Two `.tres` files share the same UID (typically because the plugin folder was copied somewhere else in the project). Find and remove the duplicate; the canonical files live in `addons/godot_unreal_bonemap/`.
-
-### `Could not create child process … FBX2glTF`
-Your project is set to the FBX2glTF importer but the binary isn't installed. Switch to ufbx in Project Settings (recommended) or install [FBX2glTF](https://github.com/godotengine/FBX2glTF) and point Godot at it.
 
 ---
 
